@@ -1,5 +1,5 @@
 import csv
-from jinja2 import Environment, FileSystemLoader
+import pandas as pd
 
 def clients_to_dict(filename):
     data_dict = {}
@@ -18,5 +18,11 @@ def clients_to_dict(filename):
     return data_dict
 
 def create_pdf_from_list(value):
-    pass
+    df = pd.DataFrame(value, columns=['Клиет','Система мониторинга', 'Имя объекта', 'Количество дней', 'Цена'])
+    df.to_excel('detalisacion.xlsx', index=False)
+#    workbook = Workbook('output.xlsx')
+#    pdf_options = PdfSaveOptions()
+#    workbook.save('output.pdf', pdf_options)
+    
+
 
