@@ -14,12 +14,12 @@ dict_clients = funcs.clients_to_dict(filename="./Детализация_для_�
 for key, value in dict_clients.items():
     email_receiver = str(key)
     email_subject = 'Детализация'
-    filename = 'detalisacion.xlsx'
+    filename = 'detalisation.xlsx'
 
     environment = Environment(loader=FileSystemLoader("templates/"))
     template = environment.get_template("test.html")
     content = template.render(key=key, value=value)
-    funcs.create_pdf_from_list(value)
+    funcs.create_excel_from_list(value)
     email_body = content
     email = classes.EmailSender(email_sender, email_password, smtp_server)
     email.create_message(email_receiver, email_subject, email_body)

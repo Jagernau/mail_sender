@@ -1,6 +1,6 @@
 import csv
 import pandas as pd
-
+from styleframe import StyleFrame
 def clients_to_dict(filename):
     data_dict = {}
 
@@ -16,10 +16,19 @@ def clients_to_dict(filename):
                 data_dict[email] = [values]
 
     return data_dict
-
-def create_pdf_from_list(value):
+#колонны по максимкльной длине системы мониторинга
+def create_excel_from_list(value):
     df = pd.DataFrame(value, columns=['Клиет','Система мониторинга', 'Имя объекта', 'Количество дней', 'Цена'])
-    df.to_excel('detalisacion.xlsx', index=False)
+    df['Цена'] = df['Цена'].astype(float)
+    excel_writer = StyleFrame.ExcelWriter('detalisation.xlsx')
+    sf = StyleFrame(df)
+    sf.set_column_width(columns=['Имя объекта',],
+                    width=36)
+    sf.set_column_width(columns=['Клиет'], width=15)
+    sf.set_column_width(columns=['Количество дней'], width=15)
+
+    sf.to_excel(excel_writer=excel_writer)
+    excel_writer.save()
 #    workbook = Workbook('output.xlsx')
 #    pdf_options = PdfSaveOptions()
 #    workbook.save('output.pdf', pdf_options)
