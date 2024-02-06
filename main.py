@@ -21,10 +21,13 @@ logger = funcs.my_logger()
 
 def job():
 
-
     for i in tqdm(list_clients, desc="Отправка писем..."):
         time.sleep(random.randint(15, 30))
-        i = i[0]
+        i = str(i[0]).replace(" ", "")
+        if i == "NULL" or i == " " or i == "":
+            continue
+        if "@" not in i:
+            continue
         try:
             logger.info(f'Начало формирования письма для {i}')
             email_receiver = str(i)
