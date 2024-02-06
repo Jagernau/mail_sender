@@ -3,23 +3,13 @@ import pandas as pd
 from styleframe import StyleFrame
 import datetime
 import locale
+import logging
 
-
-def clients_to_dict(filename):
-    data_dict = {}
-
-    with open(filename, newline='', encoding="utf8") as csvfile:
-        reader = csv.reader(csvfile)
-        next(reader)  # Пропускаем заголовок файла
-        for row in reader:
-            email = row[1]
-            values = [row[0], row[5], row[6], row[7], row[8]]
-            if email in data_dict:
-                data_dict[email].append(values)
-            else:
-                data_dict[email] = [values]
-
-    return data_dict
+def clients_to_list(filename):
+    with open(filename, 'r') as f:
+        reader = csv.reader(f)
+        data = list(reader)
+    return data
 
 def create_pdf_from_list(value):
     df = pd.DataFrame(value, columns=['Клиет', 'Система мониторинга', 'Имя объекта', 'Количество дней', 'Цена'])
@@ -53,3 +43,20 @@ def get_date_last_month():
     
 def get_current_year():
     return datetime.date.today().year
+
+def my_logger() -> logging.Logger:
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.INFO)
+
+
+    # Создание обработчика для записи в файл
+    file_handler = logging.FileHandler('log.txt')
+    file_handler.setLevel(logging.INFO)
+
+
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    file_handler.setFormatter(formatter)
+
+    # Добавление обработчика к логгеру
+    logger.addHandler(file_handler)
+    return logger

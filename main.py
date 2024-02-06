@@ -3,6 +3,9 @@ from jinja2 import Environment, FileSystemLoader
 import classes
 import funcs
 import time
+import random
+import sys
+from tqdm import tqdm
 
 
 last_month = funcs.get_date_last_month()
@@ -11,32 +14,39 @@ current_year = funcs.get_current_year()
 smtp_server = config.SMTP_SERVER
 email_sender = config.EMAIL_SENDER
 email_password = config.EMAIL_PASSWORD
-sender_name = config.SENDER_NAME
-sender_phone = config.SENDER_PHONE
+
+list_clients = [["st"], ["st"]]
+list_clients.extend(funcs.clients_to_list(filename="./clients.csv"))
+logger = funcs.my_logger()
+
+def job():
 
 
-time.sleep(60)
-dict_clients = funcs.clients_to_dict(filename="./detalisation.csv")
+    for i in tqdm(list_clients, desc="Отправка писем..."):
+        time.sleep(random.randint(15, 30))
+        i = i[0]
+        try:
+            logger.info(f'Начало формирования письма для {i}')
+            email_receiver = str(i)
+            email_subject = f'Тест'
+            environment = Environment(loader=FileSystemLoader("templates/"))
+            template = environment.get_template("file_sender.html")
+            content = template.render()
+            email_body = content
+            email = classes.EmailSender(email_sender, email_password, smtp_server)
+            email.create_message(email_receiver, email_subject, email_body)
+            email.send_email()
+            logger.info(f'Письмо для {i} отправлено')
+            with open("sends.txt", "a") as f:
+                f.write(f"{i}\n")
+            time.sleep(random.randint(20, 47))
+        except Exception as e:
+            logger.error(f'Письмо для {i} не отправлено. Ошибка: {e}')
+            with open("fails.txt", "a") as f:
+                f.write(f"{i}\n")
+            continue
 
-#print(dict_clients)
 
-for key, value in dict_clients.items():
-    email_receiver = str(key)
-    email_subject = f'Детализация за {last_month} {current_year} от Сантел Сервис'
-    filename = 'detalisation.xlsx'
-
-    environment = Environment(loader=FileSystemLoader("templates/"))
-    template = environment.get_template("file_sender.html")
-
-    content = template.render(
-            key=key, value=value, last_month=last_month, 
-            sender_name=sender_name, sender_phone=sender_phone, 
-            current_year=current_year)
-
-    funcs.create_pdf_from_list(value)
-    email_body = content
-    email = classes.EmailSender(email_sender, email_password, smtp_server)
-    email.create_message(email_receiver, email_subject, email_body)
-    email.attach_file(filename)
-    email.send_email()
-    time.sleep(35)
+if __name__ == "__main__":
+    job()
+    sys.exit()
