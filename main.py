@@ -20,29 +20,39 @@ list_clients.extend(funcs.clients_to_list(filename="./clients.csv"))
 logger = funcs.my_logger()
 
 def job():
-
     for i in tqdm(list_clients, desc="Отправка писем..."):
-        time.sleep(random.randint(15, 30))
-        i = str(i[0]).replace(" ", "")
-        if i == "NULL" or i == " " or i == "":
-            continue
-        if "@" not in i:
+        if i == []:
             continue
         try:
-            logger.info(f'Начало формирования письма для {i}')
-            email_receiver = str(i)
-            email_subject = f'Тест'
-            environment = Environment(loader=FileSystemLoader("templates/"))
-            template = environment.get_template("file_sender.html")
-            content = template.render()
-            email_body = content
-            email = classes.EmailSender(email_sender, email_password, smtp_server)
-            email.create_message(email_receiver, email_subject, email_body)
-            email.send_email()
-            logger.info(f'Письмо для {i} отправлено')
-            with open("sends.txt", "a") as f:
-                f.write(f"{i}\n")
-            time.sleep(random.randint(20, 47))
+            time.sleep(random.randint(15, 30))
+            i = str(i[0]).replace(" ", "")
+            if i == "NULL" or i == " " or i == "":
+                continue
+            if "@" not in i:
+                continue
+            try:
+                logger.info(f'Начало формирования письма для {i}')
+                email_receiver = str(i)
+                email_subject = f'Тест'
+                environment = Environment(loader=FileSystemLoader("templates/"))
+                template = environment.get_template("file_sender.html")
+                content = template.render()
+                email_body = content
+                email = classes.EmailSender(email_sender, email_password, smtp_server)
+                email.create_message(email_receiver, email_subject, email_body)
+                email.attach_file("file.txt")
+                email.send_email()
+                logger.info(f'Письмо для {i} отправлено')
+                with open("sends.txt", "a") as f:
+                    f.write(f"{i}\n")
+                time.sleep(random.randint(20, 47))
+            except Exception as e:
+                logger.error(f'Письмо для {i} не отправлено. Ошибка: {e}')
+                with open("fails.txt", "a") as f:
+                    f.write(f"{i}\n")
+                continue
+            
+
         except Exception as e:
             logger.error(f'Письмо для {i} не отправлено. Ошибка: {e}')
             with open("fails.txt", "a") as f:
